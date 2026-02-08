@@ -5,7 +5,7 @@ header('Content-Type: application/json');
 const GRID = 10;
 const SHIPS = [2,3,5];
 
-// ---------- INIT CPU ----------
+// ---------- INIT CPU IF NOT SET ----------
 if (!isset($_SESSION['cpu'])) {
     $_SESSION['cpu'] = [
         'ships' => placeShips(),
@@ -16,8 +16,16 @@ if (!isset($_SESSION['cpu'])) {
 
 $data = json_decode(file_get_contents('php://input'), true);
 
-// ---------- PLAYER PLACEMENT ----------
+// ---------- PLAYER PLACEMENT (NEW GAME START) ----------
 if (($data['action'] ?? '') === 'place') {
+
+    // Reset entire game state
+    $_SESSION['cpu'] = [
+        'ships' => placeShips(),
+        'hits' => [],
+        'shots' => []
+    ];
+
     $_SESSION['player'] = [
         'ships' => $data['ships'],
         'hits' => [],
@@ -54,6 +62,7 @@ if ($cpuHit) {
     $_SESSION['player']['hits'][] = $cpuCell;
 }
 
+// ----- GAME OVER CHECK -----
 $gameOver = count($_SESSION['cpu']['hits']) === count($_SESSION['cpu']['ships']);
 
 echo json_encode([
